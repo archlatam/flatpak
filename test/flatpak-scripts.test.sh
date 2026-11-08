@@ -870,16 +870,18 @@ test_launcher_rejects_unknown_argument() {
   expect_no_log "hyprctl"
 }
 
-test_launcher_fix_noop_when_already_working() {
+# The terminal --fix runs in has a login shell's XDG_DATA_DIRS, which already
+# lists the exports, so the fix must not trust it and skip the work.
+test_launcher_fix_ignores_terminal_environment() {
   fresh_home
   write_hyprland
   XDG_TEST="$XDG_OK"
   run ensure-launcher-path --fix
   expect_status 0
-  expect_output "Nothing to do."
-  expect_no_file "$HOME_DIR/.config/hypr/envs.lua"
-  expect_no_log "hyprctl"
-  expect_no_log "omarchy restart shell"
+  expect_file "$HOME_DIR/.config/hypr/envs.lua"
+  expect_file_contains "$HOME_DIR/.config/hypr/hyprland.lua" 'require("hypr.envs")'
+  expect_log_re "^hyprctl reload"
+  expect_log "omarchy restart shell"
 }
 
 test_launcher_fix_without_hyprland_config() {

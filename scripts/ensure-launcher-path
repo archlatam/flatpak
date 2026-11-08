@@ -91,10 +91,11 @@ esac
 
 # ------------------------------------------------------------------ fix mode
 
-if session_sees_flatpaks; then
-  info "The launcher already sees Flatpak apps. Nothing to do."
-  exit 0
-fi
+# No session check here. --fix runs in the terminal the panel opens, whose login
+# shell sources /etc/profile.d/flatpak.sh, so XDG_DATA_DIRS here already lists
+# the exports even when the shell hosting the launcher does not. The panel has
+# made that check in the launcher's own environment; the writes below are
+# idempotent, so running them again when nothing is broken does no harm.
 
 [[ -f $HYPRLAND_FILE ]] || fail "$HYPRLAND_FILE not found.
 This fix writes the Hyprland config so the session exports the Flatpak export
